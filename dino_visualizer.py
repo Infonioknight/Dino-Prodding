@@ -18,26 +18,21 @@ from torchvision import transforms
 
 import dinov2.models.vision_transformer as vits
 
-CKPT_PATH = "models/dinov2_vits14_reg4_pretrain.pth"
-OUTPUT_PATH = "attention_output.png"
-
 PATCH_SIZE = 14
-NUM_REGISTER_TOKENS = 4
 IMG_SIZE = 518
-NUM_PREFIX_TOKENS = 1 + NUM_REGISTER_TOKENS  # CLS + registers, skipped before patch tokens
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
-def load_model(device):
+def load_model(ckpt_path, device, num_register_tokens):
     model = vits.vit_small(
         patch_size=PATCH_SIZE,
-        num_register_tokens=NUM_REGISTER_TOKENS,
+        num_register_tokens=num_register_tokens,
         init_values=1.0,
         block_chunks=0,
         img_size=IMG_SIZE,
     )
-    ckpt = torch.load(CKPT_PATH, map_location="cpu")
+    ckpt = torch.load(ckpt_path, map_location="cpu")
     model.load_state_dict(ckpt)
     model = model.to(device).eval()
     return model
@@ -76,7 +71,7 @@ def load_and_preprocess(image_path, device):
     x = transform(img).unsqueeze(0).to(device)
     return img, x
 
-def visualize_attention_maps(image_path, view_mode="superimposed", mean=True):
+def visualize_attention_maps(ckpt_path, image_path, num_registers=4, view_mode="superimposed", mean=True, output_path='results/attention_map_with_registers'):
     """
     Run DINOv2 inference on an image and visualize CLS -> patch attention
     from the last transformer block.
@@ -93,7 +88,7 @@ def visualize_attention_maps(image_path, view_mode="superimposed", mean=True):
 
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-    model = load_model(device)
+    model = load_model(ckpt_path, device, num_registers)
     last_attn = patch_last_attention(model)
 
     img, x = load_and_preprocess(image_path, device)
@@ -103,8 +98,9 @@ def visualize_attention_maps(image_path, view_mode="superimposed", mean=True):
 
     attn = last_attn._attn_weights  # (1, num_heads, N, N)
     num_heads = attn.shape[1]
+    num_prefix_tokens = num_registers + 1
 
-    cls_attn = attn[0, :, 0, NUM_PREFIX_TOKENS:]  # (num_heads, num_patches)
+    cls_attn = attn[0, :, 0, num_prefix_tokens:]  # (num_heads, num_patches)
 
     grid_size = IMG_SIZE // PATCH_SIZE
     cls_attn_grid = cls_attn.reshape(num_heads, 1, grid_size, grid_size)
@@ -155,7 +151,7 @@ def visualize_attention_maps(image_path, view_mode="superimposed", mean=True):
         ax.axis("off")
 
     plt.tight_layout()
-    # plt.savefig(OUTPUT_PATH, dpi=150, bbox_inches="tight")
+    plt.savefig(output_path, dpi=150, bbox_inches="tight")
     plt.show()
 
 
