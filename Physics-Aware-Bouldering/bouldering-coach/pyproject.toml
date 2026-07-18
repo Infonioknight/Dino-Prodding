@@ -1,0 +1,36 @@
+[project]
+name = "coach"
+version = "0.1.0"
+description = "Bouldering coach MVP: pixels -> physics -> grounded coaching language"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "opencv-python>=4.10",
+    "mediapipe>=0.10",
+    "torch>=2.3",
+    "torchvision>=0.18",
+    "numpy>=1.26",
+    "scipy>=1.13",
+    "matplotlib>=3.9",
+    "pydantic>=2.7",
+    "huggingface-hub>=0.24",
+    "openai>=1.40",
+    "python-dotenv>=1.0",
+    "pillow>=10.4",
+    "tenacity>=8.5",
+]
+
+[project.scripts]
+coach = "coach.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/coach"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]

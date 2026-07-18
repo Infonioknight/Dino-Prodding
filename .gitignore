@@ -3,3 +3,8 @@ climb holds good.v2i.sam2/
 env
 .DS_Store
 models
+Physics-Aware-Bouldering/.env
+Physics-Aware-Bouldering/env
+Physics-Aware-Bouldering/bouldering-coach/.venv
+Physics-Aware-Bouldering/bouldering-coach/.env
+Physics-Aware-Bouldering/bouldering-coach/.pytest_cache

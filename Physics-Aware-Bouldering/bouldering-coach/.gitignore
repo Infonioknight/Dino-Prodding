@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Env / secrets
+.env
+
+# Data & outputs (large / regenerable)
+data/raw/*
+!data/raw/.gitkeep
+out/*
+!out/.gitkeep
+
+# OS
+.DS_Store
+
